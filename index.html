@@ -3,6 +3,7 @@
 <head> 
 	<meta charset="UTF-8" />
 	<title>Phaser - Making your first game, part 1</title>
+	<link href='http://fonts.googleapis.com/css?family=Lilita+One' rel='stylesheet' type='text/css'>
 	<script type="text/javascript" src="js/phaser.min.js"></script>
     <style type="text/css">
         body {
@@ -21,6 +22,7 @@ var stars;
 var score = 0;
 var scoreText;
 var punch_key;
+var sfx = Phaser.Sound;
 
 function preload() {
 	game.load.image('sky', 'assets/sky.png');
@@ -28,6 +30,9 @@ function preload() {
     game.load.image('star', 'assets/star.png');
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.spritesheet('hulk', 'assets/sumoHulk_spriteSheet_x4.png', 64, 64);
+    game.load.audio('jumpsfx', ['assets/Jump5.wav']);
+    game.load.audio('starsfx', ['assets/Pickup_Coin15.wav']);
+    game.load.audio('punchsfx', ['assets/Punch.wav']);
 }
 
 function create() {
@@ -66,7 +71,7 @@ function create() {
     player.animations.add('left', [6, 7, 8, 9, 10,11], 10, true);
     player.animations.add('right', [6, 7, 8, 9, 10,11], 10, true);
     player.animations.add('idol', [0, 1, 2, 3], 10, true);
-    player.animations.add('punch', [36, 37, 38], 10, false);
+    player.animations.add('punch', [36, 37, 38,37,36], 10, false);
 
     cursors = game.input.keyboard.createCursorKeys();
     punch_key = game.input.keyboard.addKey(Phaser.Keyboard.A);
@@ -86,7 +91,7 @@ function create() {
         //  This just gives each star a slightly random bounce value
         star.body.bounce.y = 0.3 + Math.random() * 0.2;
     }
-	scoreText = game.add.text(16, 16, 'Stars: 0', { font: '32px arial', fill: '#000' });
+	scoreText = game.add.text(16, 16, 'Stars: 0', { font: '32px "Lilita One"', fill: '#000' });
 }
 
 function update() {
@@ -123,24 +128,33 @@ function update() {
 	}
     else if ( punch_key.isDown && cursors.right.isDown)
 	{
+
 		player.scale.x = 1; 
         player.body.velocity.x = 250;
         player.animations.play('punch');
 	}
     else if ( punch_key.isDown && !cursors.right.isDown && !cursors.left.isDown)
 	{
+
         player.animations.play('punch');
 	}
     else
     {
         //  Stand still
-        //player.animations.stop();
-        player.animations.play('idol');
+        player.animations.stop();
+        //player.animations.play('idol');
+    }
+
+    if (punch_key.isDown){
+    	sfx = game.add.audio('punchsfx');
+	    sfx.play('');
     }
  
     //  Allow the player to jump if they are touching the ground.
     if (cursors.up.isDown && player.body.touching.down)
     {
+    	sfx = game.add.audio('jumpsfx');
+        sfx.play('');
         player.body.velocity.y = -800;
     }
 
@@ -148,6 +162,8 @@ function update() {
 
 function collectStar (player, star) {
  
+    sfx = game.add.audio('starsfx');
+    sfx.play('');
     // Removes the star from the screen
     star.kill();
   
