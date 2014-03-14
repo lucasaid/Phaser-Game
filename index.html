@@ -22,11 +22,18 @@ var stars;
 var score = 0;
 var scoreText;
 var punch_key;
+var punch_down = false;
 var sfx = Phaser.Sound;
 
 function preload() {
 	game.load.image('sky', 'assets/sky.png');
     game.load.image('ground', 'assets/platform.png');
+    game.load.image('grass', 'assets/grass_32x32.png');
+    game.load.image('dirt', 'assets/dirt_32x32.png');
+    game.load.image('tree', 'assets/tree_plane_01a_g1.png');
+    game.load.image('bush', 'assets/heights_bush_1.png');
+
+
     game.load.image('star', 'assets/star.png');
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.spritesheet('hulk', 'assets/sumoHulk_spriteSheet_x4.png', 64, 64);
@@ -43,35 +50,48 @@ function create() {
     platforms = game.add.group();
 
     // Here we create the ground.
-    var ground = platforms.create(0, game.world.height - 64, 'ground');
+    var ground = game.add.tileSprite(0, game.world.height - 64, 800, 64, 'dirt', platforms);
+    ground.body.setRectangle(800, 64, 0, 0);
+    var groundgrass = game.add.tileSprite(0, game.world.height - 64, 800, 32, 'grass', platforms);
+    //var ground = platforms.create(0, game.world.height - 64, 'dirt');
 
    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    ground.scale.setTo(2, 2);
+    //ground.scale.setTo(2, 2);
 
     //  This stops it from falling away when you jump on it
     ground.body.immovable = true;
 
 
     //  Now let's create two ledges
-    var ledge = platforms.create(400, 400, 'ground');
+    var ledge = game.add.tileSprite(400, 400, 400, 32, 'grass', platforms);
+    ledge.body.setRectangle(400, 32, 0, 0);
+
+    //var ledge = platforms.create(400, 400, 'grass');
     ledge.body.immovable = true;
  
-    ledge = platforms.create(-150, 250, 'ground');
+    ledge = game.add.tileSprite(-150, 250, 400, 32, 'grass', platforms);
+    ledge.body.setRectangle(400, 32, 0, 0);
+
     ledge.body.immovable = true;
+    var tree = game.add.sprite(430, 10, 'tree');
+
 
     // The player and its settings
     player = game.add.sprite(32, game.world.height - 150, 'hulk');
+
+
+
  
     //  Player physics properties. Give the little guy a slight bounce.
     player.body.bounce.y = 0.1;
-    player.body.gravity.y = 25;
+    player.body.gravity.y = 1325;
     player.body.collideWorldBounds = true;
  
     //  Our two animations, walking left and right.
     player.animations.add('left', [6, 7, 8, 9, 10,11], 10, true);
     player.animations.add('right', [6, 7, 8, 9, 10,11], 10, true);
     player.animations.add('idol', [0, 1, 2, 3], 10, true);
-    player.animations.add('punch', [36, 37, 38,37,36], 10, false);
+    player.animations.add('punch', [36, 37, 38,37,36], 20, false);
 
     cursors = game.input.keyboard.createCursorKeys();
     punch_key = game.input.keyboard.addKey(Phaser.Keyboard.A);
@@ -86,11 +106,12 @@ function create() {
         var star = stars.create(i * 70, 0, 'star');
  
         //  Let gravity do its thing
-        star.body.gravity.y = 6;
+        star.body.gravity.y = 1325;
  
         //  This just gives each star a slightly random bounce value
         star.body.bounce.y = 0.3 + Math.random() * 0.2;
     }
+    var bush = game.add.sprite(430, 316, 'bush');
 	scoreText = game.add.text(16, 16, 'Stars: 0', { font: '32px "Lilita One"', fill: '#000' });
 }
 
@@ -104,7 +125,33 @@ function update() {
     //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
     player.anchor.setTo(.5, 1);
- 
+    if (punch_key.isDown && !punch_down){
+        punch();
+    } else if(!punch_key.isDown && punch_down) {
+        punch_down = false;
+    }
+
+    if ( punch_key.isDown && cursors.left.isDown)
+    {
+        if(!punch_down){
+            punch();
+        }
+        player.scale.x = -1;
+        player.body.velocity.x = -250;
+    }
+    else if ( punch_key.isDown && cursors.right.isDown)
+    {
+        if(!punch_down){
+            punch();
+        }
+        player.scale.x = 1; 
+        player.body.velocity.x = 250;
+    } else if(!punch_key.isDown && punch_down) {
+        punch_down = false;
+    }
+
+
+
     if (cursors.left.isDown && !punch_key.isDown)
     {
         //  Move to the left
@@ -117,38 +164,16 @@ function update() {
         //  Move to the right
 		player.scale.x = 1; 
         player.body.velocity.x = 250;
- 
         player.animations.play('right');
     }
-    else if ( punch_key.isDown && cursors.left.isDown)
-	{
-		player.scale.x = -1;
-        player.body.velocity.x = -250;
-        player.animations.play('punch');
-	}
-    else if ( punch_key.isDown && cursors.right.isDown)
-	{
-
-		player.scale.x = 1; 
-        player.body.velocity.x = 250;
-        player.animations.play('punch');
-	}
-    else if ( punch_key.isDown && !cursors.right.isDown && !cursors.left.isDown)
-	{
-
-        player.animations.play('punch');
-	}
-    else
+    else if(!punch_down)
     {
         //  Stand still
-        player.animations.stop();
-        //player.animations.play('idol');
+        //player.animations.stop();
+        player.animations.play('idol');
     }
 
-    if (punch_key.isDown){
-    	sfx = game.add.audio('punchsfx');
-	    sfx.play('');
-    }
+
  
     //  Allow the player to jump if they are touching the ground.
     if (cursors.up.isDown && player.body.touching.down)
@@ -170,6 +195,14 @@ function collectStar (player, star) {
     //  Add and update the score
     score += 1;
     scoreText.content = 'Stars: ' + score;
+}
+
+function punch (){
+    console.log('punch');
+    punch_down = true;
+    sfx = game.add.audio('punchsfx');
+    sfx.play('');
+    player.animations.play('punch');
 }
 
 </script>
