@@ -71,13 +71,16 @@ function preload() {
 }
 
 function create() {
+
     //  A simple background for our game
     var blurX = game.add.filter('BlurX');
     var blurY = game.add.filter('BlurY');
-    var sky = game.add.sprite(0, 0, 'sky');
+    var sky = game.add.sprite(0, -600, 'sky');
+
+    sky.scale.setTo(2, 2);
     blurX.blur = 15;
     blurY.blur = 15;
-    sky.filters = [blurX, blurY];
+    //sky.filters = [blurX, blurY];
     var mountain2 = game.add.sprite(-180, 300, 'mountain2');
 
     var blurX1 = game.add.filter('BlurX');
@@ -93,7 +96,7 @@ function create() {
     blurY2.blur = 10;
     var mountain = game.add.sprite(30, 300, 'mountain');
     mountain.filters = [blurX2, blurY2];
-    var tree = game.add.sprite(430, 10, 'tree');
+    var tree = game.add.sprite(410, 10, 'tree');
     var bush = game.add.sprite(430, 326, 'bush');
 
     
@@ -102,10 +105,10 @@ function create() {
     platforms = game.add.group();
 
     // Here we create the ground.
-    var ground = game.add.tileSprite(0, game.world.height - 64, 800, 64, 'dirt', platforms);
-    ground.body.setRectangle(800, 64, 0, 0);
+    var ground = game.add.tileSprite(0, game.world.height - 64, 1400, 64, 'dirt', platforms);
+    ground.body.setRectangle(1400, 64, 0, 0);
     ground.body.angle += 10;
-    var groundgrass = game.add.tileSprite(0, game.world.height - 64, 800, 32, 'grass', platforms);
+    var groundgrass = game.add.tileSprite(0, game.world.height - 64, 1400, 32, 'grass', platforms);
     //var ground = platforms.create(0, game.world.height - 64, 'dirt');
 
    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
@@ -164,19 +167,24 @@ function create() {
         star.body.bounce.y = 0.3 + Math.random() * 0.2;
     }
 
-    var emitter = game.add.emitter(game.world.centerX, 0, 400);
-    emitter.width = game.world.width;
+    var emitter = game.add.emitter(game.world.centerX, -600, 6200);
+    emitter.width = 1400;
     //emitter.angle = 30; // uncomment to set an angle for the rain.
 
     emitter.makeParticles('rain');
     emitter.maxParticleScale = 0.5;
     emitter.minParticleScale = 0.1;
-    emitter.setYSpeed(300, 500);
+    emitter.setYSpeed(300, 1200);
     emitter.setXSpeed(-5, 5);
     emitter.minRotation = 0;
     emitter.maxRotation = 0;
 
     emitter.start(false, 1600, 5, 0);
+
+    game.camera.follow(player);
+
+    game.world.setBounds(0, -600, 1400, 1200);
+
 }
 function update() {
 
@@ -239,6 +247,7 @@ function update() {
         }
 
 
+
      
         //  Allow the player to jump if they are touching the ground.
         if (cursors.up.isDown && player.body.touching.down)
@@ -277,13 +286,14 @@ function punch (){
 
 function createText() {
     fontloaded = true;
-    timer = game.add.text(game.world.width-136, 16, 'Time: 0', { font: '32px "Lilita One"', fill: '#000' });
+    timer = game.add.text(800-136, 16, 'Time: 0', { font: '32px "Lilita One"', fill: '#000' });
     timer.fixedToCamera = true;
     startTimer();
     scoreText = game.add.text(16, 16, 'Stars: 0', { font: '32px "Lilita One"', fill: '#000' });
     scoreText.fixedToCamera = true;
-    gotext = game.add.text(game.world.centerX-43, game.world.centerY-30, 'GO!', { font: '52px "Lilita One"', fill: '#000' });
+    gotext = game.add.text(400-43, 300-30, 'GO!', { font: '52px "Lilita One"', fill: '#000' });
     gotext.alpha = 0;
+    gotext.fixedToCamera = true;
 
     game.add.tween(gotext).to( { alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0, 3, true);
 
@@ -299,6 +309,17 @@ function startTimer(){
 function stopTimer() {
     if(timer){
         clearInterval(timerInt);
+    }
+}
+function onKeyUp(event){
+    switch (event,keyCode){
+        case Keyboard.RIGHT:
+            player.scale.x = 1;
+            player.body.velocity.x = 20;
+            setTimeout(function(){
+                player.body.velocity.x = 0;
+            },100); 
+            player.animations.play('right');
     }
 }
 </script>
