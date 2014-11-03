@@ -2,15 +2,37 @@
 <html lang="en"> 
 <head> 
 	<meta charset="UTF-8" />
-	<title>Phaser - Making your first game, part 1</title>
+	<title>Phaser Demo</title>
 	<script type="text/javascript" src="js/phaser.min.js"></script>
     <style type="text/css">
-        body {
-            margin: 0;
+        body, canvas, header {
+            margin: auto;
+        }
+        header {
+            width:800px;
+            margin-top:2%;
+            font-family: Verdana;
+            padding-bottom:10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        canvas {
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Phaser Demo</h1>
+        <p>Collect all the stars</p>
+        <strong>Controls</strong>
+        <ul>
+            <li>Up - Jump</li>
+            <li>Left - Left</li>
+            <li>Right - Right</li>
+            <li>A - Punch</li>
+        </ul>
+    </header>
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 <script type="text/javascript">
 
